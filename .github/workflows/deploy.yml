@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t infrastructure-search-api:latest .
+
+    - name: Save Docker image
+      run: |
+        docker save infrastructure-search-api:latest | gzip > search-api.tar.gz
+
+    - name: Deploy to Hetzner
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        SERVER_USER: ${{ secrets.SERVER_USER }}
+      run: |
+        # Setup SSH
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+        # Copy image to server
+        scp search-api.tar.gz $SERVER_USER@$SERVER_HOST:/tmp/
+
+        # Load and restart on server
+        ssh $SERVER_USER@$SERVER_HOST << 'EOF'
+          cd ~/lookuply/infrastructure
+          # Pull latest infrastructure changes
+          git pull origin main
+          # Load new Docker image
+          docker load < /tmp/search-api.tar.gz
+          # Restart service
+          docker compose up -d search-api
+          # Cleanup
+          rm /tmp/search-api.tar.gz
+        EOF

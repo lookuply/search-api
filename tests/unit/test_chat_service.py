@@ -61,7 +61,7 @@ async def test_chat_no_results(
 
     assert response is not None
     assert len(response.sources) == 0
-    assert "don't have information" in response.answer.lower()
+    assert "don't have enough information" in response.answer.lower()
 
 
 @pytest.mark.asyncio

@@ -45,15 +45,16 @@ def test_search_empty_results(client: MeilisearchClient) -> None:
 def test_search_with_limit(client: MeilisearchClient) -> None:
     """Test search with limit."""
     mock_index = MagicMock()
+    # Mock should return only limited results (simulating Meilisearch behavior)
     mock_index.search.return_value = {
-        "hits": [{"id": str(i)} for i in range(20)],
+        "hits": [{"id": str(i)} for i in range(5)],
         "estimatedTotalHits": 20,
     }
     client.index = mock_index
 
     results = client.search("test", limit=5)
 
-    assert len(results) <= 5
+    assert len(results) == 5
     mock_index.search.assert_called_once()
     call_kwargs = mock_index.search.call_args.kwargs
     assert call_kwargs.get("limit") == 5

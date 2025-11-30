@@ -56,8 +56,10 @@ def test_search_with_limit(client: MeilisearchClient) -> None:
 
     assert len(results) == 5
     mock_index.search.assert_called_once()
-    call_kwargs = mock_index.search.call_args.kwargs
-    assert call_kwargs.get("limit") == 5
+    # Check that search was called with correct arguments
+    call_args = mock_index.search.call_args[0]
+    call_dict = call_args[1] if len(call_args) > 1 else {}
+    assert call_dict.get("limit") == 5
 
 
 def test_index_document(client: MeilisearchClient) -> None:

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from search_api.chat_service import ChatResponse, ChatService
+from search_api.chat_service import ChatService
 from search_api.meilisearch_client import SearchResult
 
 

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from search_api.meilisearch_client import MeilisearchClient, SearchResult
+from search_api.meilisearch_client import MeilisearchClient
 
 
 @pytest.fixture
@@ -45,7 +45,10 @@ def test_search_empty_results(client: MeilisearchClient) -> None:
 def test_search_with_limit(client: MeilisearchClient) -> None:
     """Test search with limit."""
     mock_index = MagicMock()
-    mock_index.search.return_value = {"hits": [{"id": str(i)} for i in range(20)], "estimatedTotalHits": 20}
+    mock_index.search.return_value = {
+        "hits": [{"id": str(i)} for i in range(20)],
+        "estimatedTotalHits": 20,
+    }
     client.index = mock_index
 
     results = client.search("test", limit=5)

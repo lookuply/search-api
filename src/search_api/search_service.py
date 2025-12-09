@@ -4,7 +4,6 @@ Single Responsibility: Search index interaction only
 """
 
 import logging
-from typing import List
 
 from search_api.meilisearch_client import MeilisearchClient, SearchResult
 from search_api.models import Source
@@ -22,7 +21,7 @@ class SearchService:
     def __init__(self, client: MeilisearchClient):
         self.client = client
 
-    def search(self, query: str, language: str = "en", limit: int = 10) -> List[Source]:
+    def search(self, query: str, language: str = "en", limit: int = 10) -> list[Source]:
         """
         Search Meilisearch index for relevant pages
 
@@ -39,7 +38,7 @@ class SearchService:
         """
         try:
             # Query Meilisearch (fast!)
-            results: List[SearchResult] = self.client.search(query, limit=limit)
+            results: list[SearchResult] = self.client.search(query, limit=limit)
 
             # Transform to Source objects
             sources = []

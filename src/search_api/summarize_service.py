@@ -4,7 +4,6 @@ Single Responsibility: AI answer generation only
 """
 
 import logging
-from typing import List
 
 from search_api.meilisearch_client import MeilisearchClient, SearchResult
 from search_api.ollama_client import OllamaClient
@@ -27,7 +26,7 @@ class SummarizeService:
         self.ollama = ollama_client
 
     async def generate_answer(
-        self, query: str, language: str, source_ids: List[str]
+        self, query: str, language: str, source_ids: list[str]
     ) -> str:
         """
         Generate AI answer using LLM and source content
@@ -66,7 +65,11 @@ class SummarizeService:
             # 3. Generate answer with LLM
             prompt = self._build_prompt(query, context, language)
 
-            system_prompt = """You are a helpful search assistant. Answer the user's question based ONLY on the provided sources. Be concise and accurate."""
+            system_prompt = (
+                "You are a helpful search assistant. "
+                "Answer the user's question based ONLY on the provided sources. "
+                "Be concise and accurate."
+            )
 
             answer = await self.ollama.generate(prompt, system=system_prompt)
 
@@ -79,7 +82,7 @@ class SummarizeService:
             logger.error(f"Summarize error: {type(e).__name__}")
             raise
 
-    def _build_context(self, sources: List[SearchResult]) -> str:
+    def _build_context(self, sources: list[SearchResult]) -> str:
         """Build context string from source content"""
         context_parts = []
 
@@ -96,18 +99,16 @@ class SummarizeService:
         lang_names = {"en": "English", "sk": "Slovak", "de": "German"}
         lang_name = lang_names.get(language, "English")
 
-        return f"""You are a helpful search assistant. Answer the user's question based ONLY on the provided sources.
-
-Sources:
-{context}
-
-User Question: {query}
-
-Instructions:
-- Answer in {lang_name}
-- Use only information from the sources
-- Be concise and accurate (2-3 paragraphs maximum)
-- If sources don't contain the answer, say so
-- Do not make up information
-
-Answer:"""
+        return (
+            "You are a helpful search assistant. "
+            "Answer the user's question based ONLY on the provided sources.\n\n"
+            f"Sources:\n{context}\n\n"
+            f"User Question: {query}\n\n"
+            "Instructions:\n"
+            f"- Answer in {lang_name}\n"
+            "- Use only information from the sources\n"
+            "- Be concise and accurate (2-3 paragraphs maximum)\n"
+            "- If sources don't contain the answer, say so\n"
+            "- Do not make up information\n\n"
+            "Answer:"
+        )

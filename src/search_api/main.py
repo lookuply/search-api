@@ -7,8 +7,13 @@ from pydantic import BaseModel
 from search_api.chat_service import ChatResponse, ChatService
 from search_api.config import settings
 from search_api.meilisearch_client import MeilisearchClient
+from search_api.models import (
+    SearchRequest,
+    SearchResponse,
+    SummarizeRequest,
+    SummarizeResponse,
+)
 from search_api.ollama_client import OllamaClient
-from search_api.models import SearchRequest, SearchResponse, SummarizeRequest, SummarizeResponse
 from search_api.search_service import SearchService
 from search_api.summarize_service import SummarizeService
 
@@ -88,7 +93,7 @@ async def search_sources(request: SearchRequest) -> SearchResponse:
 
         return SearchResponse(sources=sources)
 
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=503, detail="Search service unavailable")
 
 
@@ -109,7 +114,7 @@ async def summarize_answer(request: SummarizeRequest) -> SummarizeResponse:
 
         return SummarizeResponse(answer=answer, query_id=request.query_id)
 
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Failed to generate answer")
 
 

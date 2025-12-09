@@ -2,9 +2,9 @@
 Pydantic models for API requests/responses
 """
 
-from pydantic import BaseModel, Field, field_validator
-from typing import List
 from uuid import uuid4
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class SearchRequest(BaseModel):
@@ -36,7 +36,7 @@ class Source(BaseModel):
 class SearchResponse(BaseModel):
     """Response model for /api/search"""
 
-    sources: List[Source]
+    sources: list[Source]
     query_id: str = Field(default_factory=lambda: str(uuid4()))
 
 
@@ -46,7 +46,7 @@ class SummarizeRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     language: str = Field(..., pattern="^(en|sk|de)$")
     query_id: str
-    source_ids: List[str] = Field(..., min_length=1)
+    source_ids: list[str] = Field(..., min_length=1)
 
     @field_validator("query")
     @classmethod

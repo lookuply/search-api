@@ -3,9 +3,10 @@ Test suite for /api/search endpoint (sources only)
 TDD: Write tests FIRST, then implement
 """
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
 
 from search_api.main import app
 from search_api.meilisearch_client import SearchResult

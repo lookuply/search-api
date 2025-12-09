@@ -8,8 +8,9 @@ from search_api.chat_service import ChatResponse, ChatService
 from search_api.config import settings
 from search_api.meilisearch_client import MeilisearchClient
 from search_api.ollama_client import OllamaClient
-from search_api.models import SearchRequest, SearchResponse
+from search_api.models import SearchRequest, SearchResponse, SummarizeRequest, SummarizeResponse
 from search_api.search_service import SearchService
+from search_api.summarize_service import SummarizeService
 
 # Create FastAPI app
 app = FastAPI(
@@ -41,6 +42,9 @@ ollama_client = OllamaClient(
 )
 
 search_service = SearchService(client=search_client)
+summarize_service = SummarizeService(
+    search_client=search_client, ollama_client=ollama_client
+)
 chat_service = ChatService(search_client=search_client, ollama_client=ollama_client)
 
 
@@ -86,6 +90,27 @@ async def search_sources(request: SearchRequest) -> SearchResponse:
 
     except Exception as e:
         raise HTTPException(status_code=503, detail="Search service unavailable")
+
+
+@app.post("/api/summarize", response_model=SummarizeResponse)
+async def summarize_answer(request: SummarizeRequest) -> SummarizeResponse:
+    """
+    Slow endpoint: Generate AI answer from sources (2-3s)
+
+    Requires source_ids from /api/search
+    Privacy: Does NOT log query or answer
+    """
+    try:
+        answer = await summarize_service.generate_answer(
+            query=request.query,
+            language=request.language,
+            source_ids=request.source_ids,
+        )
+
+        return SummarizeResponse(answer=answer, query_id=request.query_id)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to generate answer")
 
 
 @app.post("/chat", response_model=ChatResponse)

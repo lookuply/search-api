@@ -3,9 +3,10 @@ Test suite for /api/summarize endpoint (AI answer generation)
 TDD: Write tests FIRST, then implement
 """
 
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, AsyncMock
 
 from search_api.main import app
 from search_api.meilisearch_client import SearchResult
@@ -28,14 +29,20 @@ def mock_search_results():
             id="2",
             title="Introduction to Quantum Physics",
             url="https://example.com/quantum-intro",
-            content="Quantum physics is the study of matter and energy at the most fundamental level...",
+            content=(
+                "Quantum physics is the study of matter and energy "
+                "at the most fundamental level..."
+            ),
             score=0.87,
         ),
         SearchResult(
             id="3",
             title="Quantum Computers Today",
             url="https://example.com/quantum-today",
-            content="Modern quantum computers are being developed by companies like IBM and Google...",
+            content=(
+                "Modern quantum computers are being developed by companies "
+                "like IBM and Google..."
+            ),
             score=0.82,
         ),
     ]
@@ -44,7 +51,12 @@ def mock_search_results():
 @pytest.fixture
 def mock_llm_answer():
     """Mock LLM-generated answer."""
-    return "Quantum computing is a revolutionary technology that uses principles of quantum mechanics to process information. Unlike classical computers that use bits (0 or 1), quantum computers use qubits which can exist in multiple states simultaneously."
+    return (
+        "Quantum computing is a revolutionary technology that uses principles "
+        "of quantum mechanics to process information. Unlike classical computers "
+        "that use bits (0 or 1), quantum computers use qubits which can exist "
+        "in multiple states simultaneously."
+    )
 
 
 class TestSummarizeEndpoint:

@@ -8,6 +8,8 @@ from search_api.chat_service import ChatResponse, ChatService
 from search_api.config import settings
 from search_api.meilisearch_client import MeilisearchClient
 from search_api.ollama_client import OllamaClient
+from search_api.models import SearchRequest, SearchResponse
+from search_api.search_service import SearchService
 
 # Create FastAPI app
 app = FastAPI(
@@ -38,6 +40,7 @@ ollama_client = OllamaClient(
     timeout=settings.ollama_timeout,
 )
 
+search_service = SearchService(client=search_client)
 chat_service = ChatService(search_client=search_client, ollama_client=ollama_client)
 
 
@@ -64,6 +67,25 @@ async def health() -> dict[str, str]:
         raise HTTPException(status_code=503, detail="Meilisearch unavailable")
 
     return {"status": "healthy", "search": "ok"}
+
+
+@app.post("/api/search", response_model=SearchResponse)
+async def search_sources(request: SearchRequest) -> SearchResponse:
+    """
+    Fast endpoint: Return relevant sources only (< 100ms)
+
+    Does NOT generate AI answer - use /api/summarize for that
+    Privacy: Does NOT log query or user data
+    """
+    try:
+        sources = search_service.search(
+            query=request.query, language=request.language, limit=request.limit
+        )
+
+        return SearchResponse(sources=sources)
+
+    except Exception as e:
+        raise HTTPException(status_code=503, detail="Search service unavailable")
 
 
 @app.post("/chat", response_model=ChatResponse)

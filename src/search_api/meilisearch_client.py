@@ -13,7 +13,7 @@ class SearchResult(BaseModel):
     title: str
     content: str
     url: str
-    score: float = 1.0
+    score: float = 0.0
 
 
 class MeilisearchClient:
@@ -40,7 +40,7 @@ class MeilisearchClient:
         Returns:
             List of search results
         """
-        response = self.index.search(query, {"limit": limit})
+        response = self.index.search(query, {"limit": limit, "showRankingScore": True})
 
         results = []
         for hit in response.get("hits", []):
@@ -49,7 +49,7 @@ class MeilisearchClient:
                 title=hit.get("title", ""),
                 content=hit.get("content", ""),
                 url=hit.get("url", ""),
-                score=hit.get("_rankingScore", 1.0),
+                score=hit.get("_rankingScore", 0.0),
             )
             results.append(result)
 

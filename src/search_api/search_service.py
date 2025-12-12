@@ -58,6 +58,9 @@ class SearchService:
             # DO NOT LOG QUERY (privacy!)
             logger.info(f"Search completed: {len(sources)} results found")
 
+            # Filter out low-relevance results (< 0.5 = irrelevant)
+            sources = [s for s in sources if s.relevance_score >= 0.5]
+
             # Sort by relevance score (descending)
             sources.sort(key=lambda s: s.relevance_score, reverse=True)
 
